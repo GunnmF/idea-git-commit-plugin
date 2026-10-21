@@ -8,10 +8,13 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 /**
  * 调用 OpenAI 兼容的 chat/completions 接口。
  * 兼容 OpenAI / DeepSeek / Moonshot / 通义 / Ollama 等同类服务。
+ *
+ * 全部走 sendAsync，返回的 [CompletableFuture] 调用 cancel(true) 即可中断底层 HTTP 请求。
  */
 object AiService {
 
@@ -20,20 +23,24 @@ object AiService {
         .connectTimeout(Duration.ofSeconds(15))
         .build()
 
-    fun generateCommitMessage(diff: String): String {
+    fun generateCommitMessageAsync(diff: String): CompletableFuture<String> {
         val s = AiCommitSettings.getInstance().state
-        return chat(
+        return chatAsync(
             model = s.model,
             system = PromptBuilder.buildSystemPrompt(s),
             user = PromptBuilder.buildUserPrompt(diff)
-        )
+        ).thenApply { cleanMarkdown(it) }
     }
 
-    /** 设置页「测试连接」用 */
+    /** 设置页「测试连接」用（同步等待结果） */
     fun testConnection(): String =
-        chat(model = AiCommitSettings.getInstance().state.model, system = null, user = "只回复：ok")
+        chatAsync(
+            model = AiCommitSettings.getInstance().state.model,
+            system = null,
+            user = "只回复：ok"
+        ).join()
 
-    private fun chat(model: String, system: String?, user: String): String {
+    private fun chatAsync(model: String, system: String?, user: String): CompletableFuture<String> {
         val s = AiCommitSettings.getInstance().state
         require(s.apiKey.isNotBlank()) { "请先在 Settings → Tools → AI Git Commit 中配置 API Key" }
         require(s.baseUrl.isNotBlank()) { "请先配置 Base URL" }
@@ -57,18 +64,19 @@ object AiService {
             .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        if (response.statusCode() !in 200..299) {
-            throw RuntimeException("AI 请求失败 (HTTP ${response.statusCode()})：${response.body().take(500)}")
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply { response ->
+            if (response.statusCode() !in 200..299) {
+                throw RuntimeException("AI 请求失败 (HTTP ${response.statusCode()})：${response.body().take(500)}")
+            }
+            gson.fromJson(response.body(), JsonObject::class.java)
+                .getAsJsonArray("choices")[0].asJsonObject
+                .getAsJsonObject("message")["content"].asString
         }
+    }
 
-        val content = gson.fromJson(response.body(), JsonObject::class.java)
-            .getAsJsonArray("choices")[0].asJsonObject
-            .getAsJsonObject("message")["content"].asString
-
-        // 有些模型爱套一层 ``` 代码块，剥掉
-        return content.trim()
+    /** 有些模型爱套一层 ``` 代码块，剥掉 */
+    private fun cleanMarkdown(content: String): String =
+        content.trim()
             .removePrefix("```").removeSuffix("```")
             .trim()
-    }
 }

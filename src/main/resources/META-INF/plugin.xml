@@ -15,7 +15,7 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.fanchen.aicommit.settings.AiCommitSettings"/>
+        <!-- AiCommitSettings / AiGenerationService 均为 @Service 注解的 Light Service，无需在此注册 -->
         <applicationConfigurable
                 parentId="tools"
                 instance="com.fanchen.aicommit.settings.AiCommitConfigurable"
