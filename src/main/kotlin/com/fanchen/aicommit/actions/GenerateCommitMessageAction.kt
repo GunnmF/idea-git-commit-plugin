@@ -30,7 +30,8 @@ class GenerateCommitMessageAction : AnAction() {
             e.presentation.icon = AllIcons.Actions.Suspend
             e.presentation.isEnabledAndVisible = true
         } else {
-            // 空闲：不改动外观，自动使用 plugin.xml 里定义的 ✨ 图标和文字
+            // 空闲：显式从模板恢复外观（✨ 图标和文字），防止工具栏复用被改过的 presentation
+            e.presentation.copyFrom(templatePresentation)
             e.presentation.isEnabledAndVisible = GitDiffCollector.hasRepository(project)
         }
     }

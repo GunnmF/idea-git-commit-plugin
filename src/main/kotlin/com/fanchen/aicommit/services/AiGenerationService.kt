@@ -79,7 +79,9 @@ class AiGenerationService(private val project: Project) {
 
     /** 强制刷新 Action 工具栏，让 update() 重新执行以切换图标 */
     private fun refreshActions() {
-        ActivityTracker.getInstance().inc()
+        ApplicationManager.getApplication().invokeLater {
+            ActivityTracker.getInstance().inc()
+        }
     }
 
     private fun notify(content: String, type: NotificationType) {
