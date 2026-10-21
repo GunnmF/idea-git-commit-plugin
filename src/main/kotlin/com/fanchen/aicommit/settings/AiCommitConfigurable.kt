@@ -3,11 +3,14 @@ package com.fanchen.aicommit.settings
 import com.fanchen.aicommit.services.AiService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.dsl.builder.Align
+import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.builder.rows
 import javax.swing.JComponent
 
 /**
@@ -16,7 +19,7 @@ import javax.swing.JComponent
 class AiCommitConfigurable : Configurable {
 
     private val state get() = AiCommitSettings.getInstance().state
-    private var root: com.intellij.ui.dsl.builder.DialogPanel? = null
+    private var root: DialogPanel? = null
 
     override fun getDisplayName(): String = "AI Git Commit"
 

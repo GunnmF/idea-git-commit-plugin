@@ -31,7 +31,7 @@
                 text="AI 生成 Commit Message"
                 description="根据 staged diff 调用 AI 生成提交信息"
                 icon="/icons/aiCommit.svg">
-            <add-to-group group-id="Vcs.CheckinMessageToolbar" anchor="first"/>
+            <add-to-group group-id="ChangesView.CommitToolbar" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt G"/>
         </action>
     </actions>
