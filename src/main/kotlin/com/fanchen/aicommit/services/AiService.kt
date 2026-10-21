@@ -32,13 +32,35 @@ object AiService {
         ).thenApply { cleanMarkdown(it) }
     }
 
-    /** 设置页「测试连接」用（同步等待结果） */
-    fun testConnection(): String =
+    /** 设置页「测试连接」用 */
+    fun testConnectionAsync(): CompletableFuture<String> =
         chatAsync(
             model = AiCommitSettings.getInstance().state.model,
             system = null,
             user = "只回复：ok"
-        ).join()
+        )
+
+    /** 设置页「获取模型列表」用，调用 OpenAI 兼容的 GET /models */
+    fun fetchModelsAsync(): CompletableFuture<List<String>> {
+        val s = AiCommitSettings.getInstance().state
+        require(s.apiKey.isNotBlank()) { "请先配置 API Key" }
+        require(s.baseUrl.isNotBlank()) { "请先配置 Base URL" }
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(s.baseUrl.trimEnd('/') + "/models"))
+            .timeout(Duration.ofSeconds(30))
+            .header("Authorization", "Bearer ${s.apiKey}")
+            .GET()
+            .build()
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply { response ->
+            if (response.statusCode() !in 200..299) {
+                throw RuntimeException("获取模型列表失败 (HTTP ${response.statusCode()})：${response.body().take(500)}")
+            }
+            val data = gson.fromJson(response.body(), JsonObject::class.java).getAsJsonArray("data")
+            data.mapNotNull { it.asJsonObject?.get("id")?.asString }.sorted()
+        }
+    }
 
     private fun chatAsync(model: String, system: String?, user: String): CompletableFuture<String> {
         val s = AiCommitSettings.getInstance().state
