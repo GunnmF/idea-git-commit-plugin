@@ -10,7 +10,9 @@ group = providers.gradleProperty("pluginGroup").get()
 // 版本号 = gradle.properties 里的基础版本（major.minor）+ version.properties 里自增的 buildNumber
 // 每次执行 buildPlugin 成功后 buildNumber 自动 +1，保证每次打包版本号都递增
 val buildNumberFile = rootProject.file("version.properties")
-val buildNumber: Int = run {
+// CI 里用 -PciBuildNumber=<run_number> 传入单调递增的构建号（每次 CI 构建版本号都不同）；
+// 本地构建则读 version.properties 并在 buildPlugin 成功后自增
+val buildNumber: Int = providers.gradleProperty("ciBuildNumber").orNull?.toIntOrNull() ?: run {
     val props = Properties()
     if (buildNumberFile.exists()) buildNumberFile.inputStream().use { props.load(it) }
     props.getProperty("buildNumber", "0").toIntOrNull() ?: 0
@@ -56,9 +58,10 @@ tasks {
         gradleVersion = "8.10.2"
     }
 
-    // 打包成功后 buildNumber +1，下次构建自动用新版本号
+    // 打包成功后 buildNumber +1，下次构建自动用新版本号（CI 用 -PciBuildNumber 时不参与自增）
     named("buildPlugin") {
         doLast {
+            if (providers.gradleProperty("ciBuildNumber").isPresent) return@doLast
             val props = Properties()
             props.setProperty("buildNumber", (buildNumber + 1).toString())
             buildNumberFile.outputStream().use { props.store(it, "auto-incremented by buildPlugin") }

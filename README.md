@@ -54,8 +54,19 @@ src/main/kotlin/com/fanchen/aicommit/
 ./gradlew runIde
 
 # 打插件包（产物在 build/distributions/*.zip，可在任意 JetBrains IDE 中安装）
+# 本地打包版本号自动递增（version.properties 里的 buildNumber 每次 +1）
 ./gradlew buildPlugin
 ```
+
+## 发版（GitHub Actions）
+
+推 `master` 分支自动触发 `.github/workflows/release.yml`：
+
+1. 计算版本号：`gradle.properties` 的 major.minor + CI 构建号（如 `0.1.7`）
+2. 该版本 Release 已存在且有 zip 则跳过（防重复发版，挂了会自动补齐）
+3. 构建插件 zip → 自动建 tag（指向被构建的 commit）→ 上传 Release
+
+升 minor/major 版本：改 `gradle.properties` 里的 `pluginVersion` 即可。
 
 沙箱或已安装的 IDE 中：
 
