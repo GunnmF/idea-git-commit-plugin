@@ -190,7 +190,7 @@ class AiCommitConfigurable : Configurable {
 
     private fun balloon(content: String, type: NotificationType) {
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("AI Git Commit")
+            .getNotificationGroup("Lazy Commit")
             .createNotification(content, type)
             .notify(null)
     }

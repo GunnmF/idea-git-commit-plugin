@@ -86,7 +86,7 @@ class AiGenerationService(private val project: Project) {
 
     private fun notify(content: String, type: NotificationType) {
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("AI Git Commit")
+            .getNotificationGroup("Lazy Commit")
             .createNotification(content, type)
             .notify(project)
     }

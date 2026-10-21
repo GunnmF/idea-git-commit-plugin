@@ -1,13 +1,25 @@
 <idea-plugin>
-    <id>com.fanchen.aicommit</id>
-    <name>AI Git Commit</name>
+    <id>cc.zxc.lazycommit</id>
+    <name>Lazy Commit</name>
     <vendor email="" url="">fanchen</vendor>
 
     <description><![CDATA[
-        在 Commit 工具窗口提供一键生成 Commit Message 的按钮。<br/>
-        读取当前 Git 仓库的 staged diff，调用 AI（OpenAI 兼容接口）生成符合
-        Conventional Commits 规范的提交信息并自动填充。<br/>
-        配置入口：Settings → Tools → AI Git Commit。
+        Generate meaningful Git commit messages with AI, right from the Commit tool window.<br/>
+        <br/>
+        Features:<br/>
+        <ul>
+            <li>One-click "AI Generate" button on the Commit toolbar</li>
+            <li>Reads the staged diff and generates a commit message following the Conventional Commits specification</li>
+            <li>Works with any OpenAI-compatible API (custom base URL, model list fetching, connection test)</li>
+            <li>Interruptible generation - the button turns into a stop action while generating</li>
+            <li>Your diff is sent only to the AI endpoint you configure - no data is collected</li>
+        </ul>
+        Configuration: Settings → Tools → Lazy Commit.<br/>
+        <br/>
+        在 Commit 工具窗口提供一键生成 Commit Message 的按钮。读取当前 staged diff，
+        调用 AI（OpenAI 兼容接口）生成符合 Conventional Commits 规范的提交信息并自动填充。
+        支持自定义接口地址、拉取模型列表、测试连接，生成过程可中断。
+        配置入口：Settings → Tools → Lazy Commit。
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -20,8 +32,8 @@
                 parentId="tools"
                 instance="com.fanchen.aicommit.settings.AiCommitConfigurable"
                 id="com.fanchen.aicommit.settings"
-                displayName="AI Git Commit"/>
-        <notificationGroup id="AI Git Commit" displayType="BALLOON"/>
+                displayName="Lazy Commit"/>
+        <notificationGroup id="Lazy Commit" displayType="BALLOON"/>
     </extensions>
 
     <actions>
