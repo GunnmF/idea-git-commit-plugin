@@ -1,0 +1,38 @@
+<idea-plugin>
+    <id>com.fanchen.aicommit</id>
+    <name>AI Git Commit</name>
+    <vendor email="" url="">fanchen</vendor>
+
+    <description><![CDATA[
+        在 Commit 工具窗口提供一键生成 Commit Message 的按钮。<br/>
+        读取当前 Git 仓库的 staged diff，调用 AI（OpenAI 兼容接口）生成符合
+        Conventional Commits 规范的提交信息并自动填充。<br/>
+        配置入口：Settings → Tools → AI Git Commit。
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>Git4Idea</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.fanchen.aicommit.settings.AiCommitSettings"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.fanchen.aicommit.settings.AiCommitConfigurable"
+                id="com.fanchen.aicommit.settings"
+                displayName="AI Git Commit"/>
+        <notificationGroup id="AI Git Commit" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <!-- 挂在 Commit 输入框右上角的工具栏上 -->
+        <action id="AiGitCommit.Generate"
+                class="com.fanchen.aicommit.actions.GenerateCommitMessageAction"
+                text="AI 生成 Commit Message"
+                description="根据 staged diff 调用 AI 生成提交信息"
+                icon="/icons/aiCommit.svg">
+            <add-to-group group-id="Vcs.CheckinMessageToolbar" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt G"/>
+        </action>
+    </actions>
+</idea-plugin>
