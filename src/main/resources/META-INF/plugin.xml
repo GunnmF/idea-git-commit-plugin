@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>cc.zxc.lazycommit</id>
     <name>Lazy Commit</name>
-    <vendor email="" url="">fanchen</vendor>
+    <vendor email="" url="">zxc</vendor>
 
     <description><![CDATA[
         Generate meaningful Git commit messages with AI, right from the Commit tool window.<br/>
